@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: estudio_bdd
+      POSTGRES_USER: estudio
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-estudio123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - estudio_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U estudio -d estudio_bdd"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  estudio_pgdata:
