@@ -25,7 +25,7 @@ Projeto acadêmico de documentação de requisitos com histórias de usuário, c
 
 ## 2. Executar localmente
 
-Após clonar o repositório, entre na pasta `estudio-bdd/`, que contém `docker-compose.yml`, `backend/` e `frontend/`. Abra **três terminais nessa pasta** e execute cada bloco abaixo em seu respectivo terminal.
+Após clonar o repositório, abra **três terminais na raiz**, onde estão `docker-compose.yml`, `backend/` e `frontend/`, e execute cada bloco abaixo em seu respectivo terminal.
 
 **Terminal A — banco:**
 
