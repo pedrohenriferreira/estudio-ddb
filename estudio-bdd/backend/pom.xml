@@ -4,8 +4,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.5.7</version><relativePath/>
     </parent>
-    <groupId>br.edu.mackenzie</groupId><artifactId>estudio-bdd</artifactId><version>0.2.0</version>
-    <name>Estúdio BDD</name><description>PS2 2026/2 - núcleo da API da semana 2</description>
+    <groupId>br.edu.mackenzie</groupId><artifactId>estudio-bdd</artifactId><version>0.3.0</version>
+    <name>Estúdio BDD</name><description>PS2 2026/2 - entrega até semana 3</description>
     <properties><java.version>21</java.version></properties>
     <dependencies>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>

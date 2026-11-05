@@ -1,15 +1,18 @@
 package br.edu.mackenzie.estudiobdd.controller;
 import br.edu.mackenzie.estudiobdd.dto.ApiDtos.*;
 import br.edu.mackenzie.estudiobdd.service.HistoriaService;
+import br.edu.mackenzie.estudiobdd.service.ExportacaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import static br.edu.mackenzie.estudiobdd.model.Enums.*;
 @RestController
 public class HistoriaController {
     private final HistoriaService service;
-    public HistoriaController(HistoriaService service) {this.service=service;}
+    private final ExportacaoService exportacao;
+    public HistoriaController(HistoriaService service,ExportacaoService exportacao) {this.service=service;this.exportacao=exportacao;}
     @GetMapping("/api/projetos/{projetoId}/historias")
     public List<HistoriaView> listar(@PathVariable Long projetoId,@RequestParam(required=false) Prioridade prioridade) {return service.listar(projetoId,prioridade);}
     @PostMapping("/api/projetos/{projetoId}/historias")
@@ -22,4 +25,10 @@ public class HistoriaController {
                                                                     @Valid @RequestBody HistoriaInput input) {return service.editar(id,usuarioId,input);}
     @DeleteMapping("/api/historias/{id}") @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Long id,@RequestHeader("X-Usuario-Id") Long usuarioId) {service.excluir(id,usuarioId);}
+    @GetMapping(value="/api/historias/{id}/exportacao",produces="text/plain;charset=UTF-8")
+    public ResponseEntity<String> exportar(@PathVariable Long id) {
+        return ResponseEntity.ok().contentType(new MediaType("text","plain",StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=historia-"+id+".feature")
+                .body(exportacao.exportar(id));
+    }
 }

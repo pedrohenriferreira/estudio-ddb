@@ -1,6 +1,6 @@
 # Endpoints REST — Estúdio BDD
 
-Base URL: `http://localhost:8080/api`. Requisições e respostas JSON. Rotas mutáveis de histórias/cenários/passos recebem `X-Usuario-Id: <id>` correspondente a usuário cadastrado. **Cabeçalho não autentica**: identidade simulada de sala de aula.
+Base URL: `http://localhost:8080/api`. Requisições/respostas JSON, exceto a exportação `.feature` (texto plano). Rotas mutáveis de histórias/cenários/passos/sugestões recebem `X-Usuario-Id: <id>` correspondente a usuário cadastrado. **Cabeçalho não autentica**: identidade simulada de sala de aula.
 
 ## Tabela de endpoints
 
@@ -27,6 +27,11 @@ Base URL: `http://localhost:8080/api`. Requisições e respostas JSON. Rotas mut
 | `POST` | `/cenarios/{id}/passos` | Adiciona passo validando cenário resultante | Autor |
 | `PUT` | `/passos/{id}` | Edita passo validando cenário resultante | Autor |
 | `DELETE` | `/passos/{id}` | Remove passo se cenário continuar válido | Autor |
+| `GET` | `/historias/{id}/sugestoes?decisao=PENDENTE` | Sugestões, filtro opcional | Não |
+| `POST` | `/historias/{id}/sugestoes` | Registra sugestão da IA, inicialmente PENDENTE | X-Usuario-Id |
+| `POST` | `/sugestoes/{id}/decisao` | Aceita/rejeita sugestão uma única vez | X-Usuario-Id |
+| `GET` | `/historias/{id}/exportacao` | Download `.feature` se autorizado | Não |
+| `GET` | `/projetos/{id}/resumo` | Contagens por origem/decisão/motivo | Não |
 
 ## Formatos dos corpos de entrada
 
@@ -67,13 +72,48 @@ Base URL: `http://localhost:8080/api`. Requisições e respostas JSON. Rotas mut
 
 Em `PUT /cenarios/{id}` o array de passos é **substituído integralmente**; IDs antigos não são preservados. Os endpoints individuais de passo recebem `{ "tipo": "E", "texto": "a confirmação é enviada", "posicao": 4 }`. Em qualquer operação, não é permitido deixar cenário temporariamente inválido. Posições de passos devem ser distintas e positivas; a ordem é baseada no número informado.
 
+**POST `/historias/{id}/sugestoes`**
+```json
+{
+  "ferramenta": "ChatGPT",
+  "prompt": "Proponha um cenário alternativo para a reserva de livro",
+  "conteudo": "Cenário: livro indisponível ..."
+}
+```
+
+**POST `/sugestoes/{id}/decisao`**
+```json
+{ "decisao": "REJEITADA", "motivoRejeicao": "GENERICA", "justificativa": "Não considera as regras do acervo." }
+```
+Ou `{"decisao":"ACEITA"}`. Enums para `motivoRejeicao`: `INCORRETA`, `GENERICA`, `DUPLICADA`, `FORA_DO_ESCOPO`, `OUTRO`. Para `OUTRO` é exigida justificativa. Aceitar sugestão **não cria cenário automaticamente**.
+
+## Exemplo de saída do resumo
+
+`GET /api/projetos/1/resumo`:
+```json
+{
+  "projetoId": 1,
+  "quantidadeHistorias": 2,
+  "cenariosPorOrigem": { "HUMANO": 1, "SUGESTAO_IA": 0 },
+  "sugestoesPorDecisao": { "PENDENTE": 1, "ACEITA": 0, "REJEITADA": 0 },
+  "motivosRejeicao": {
+    "INCORRETA": 0,
+    "GENERICA": 0,
+    "DUPLICADA": 0,
+    "FORA_DO_ESCOPO": 0,
+    "OUTRO": 0
+  }
+}
+```
+Os valores acima ilustram o estado inicial **esperado** com `demo` em banco vazio; não são um retorno observado por execução nesta sessão.
+
 ## Códigos HTTP e erros
 
 - `200 OK`: consulta e alteração bem-sucedida; `201 Created`: criação; `204 No Content`: exclusão.
 - `400 Bad Request`: DTO inválido, JSON malformado ou cabeçalho/enum inválido.
 - `403 Forbidden`: somente o autor pode alterar/excluir história, cenário e passos.
 - `404 Not Found`: ID inexistente.
-- `409 Conflict`: nome/título duplicado, posição de cenário repetida.
-- `422 Unprocessable Entity`: cenário inválido.
+- `409 Conflict`: nome/título duplicado, posição de cenário repetida ou sugestão já decidida.
+- `422 Unprocessable Entity`: cenário inválido, rejeição sem motivo ou exportação proibida.
 
 Resposta de erro segue RFC 9457 via `ProblemDetail` (campos `type`, `title`, `status`, `detail`), com mensagens legíveis em português.
