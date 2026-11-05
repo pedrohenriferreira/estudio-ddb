@@ -4,6 +4,14 @@
 
 Projeto acadêmico de documentação de requisitos com histórias de usuário, cenários Gherkin (`Dado/Quando/Então`), curadoria humana de sugestões de IA e exportação de arquivos `.feature`.
 
+**Integrantes:**
+
+| Integrante | Nome completo | RA |
+| --- | --- | --- |
+| 1 | Arthur Garcia | 10735807 |
+| 2 | Pedro Ferreira | 10740749 |
+| 3 | Rapahel Squinzari | 10737008 |
+
 ## 1. Tecnologias e requisitos
 
 | Parte | Stack |
@@ -13,11 +21,11 @@ Projeto acadêmico de documentação de requisitos com histórias de usuário, c
 | Frontend | React 19, Vite 6, CSS e lucide-react |
 | Banco | PostgreSQL 16 via Docker Compose (ou PostgreSQL local) |
 
-**Pré-requisitos:** JDK 21, Maven 3.9+, Node.js 20.19+ ou 22+, npm, PostgreSQL 16+ ou Docker com Compose. Na primeira execução será necessário acesso à internet para instalar dependências Maven/npm. Não inclua senhas reais no Git.
+**Pré-requisitos:** JDK 21, Maven 3.9+, Node.js 20.19+ ou 22+, npm, PostgreSQL 16+ ou Docker com Compose. Na primeira execução será necessário acesso à internet para instalar dependências Maven/npm. Não inclua senhas reais no Git. Os exemplos usam o banco de desenvolvimento descrito em `docker-compose.yml`.
 
 ## 2. Executar localmente
 
-Abra **três terminais** na raiz do projeto:
+Após clonar o repositório, entre na pasta `estudio-bdd/`, que contém `docker-compose.yml`, `backend/` e `frontend/`. Abra **três terminais nessa pasta** e execute cada bloco abaixo em seu respectivo terminal.
 
 **Terminal A — banco:**
 
@@ -41,7 +49,7 @@ API em `http://localhost:8080`. O perfil `demo` cria dois usuários, um projeto,
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -54,7 +62,7 @@ cd frontend
 npm run build
 ```
 
-**Importante:** `npm install` e `npm run build` foram executados em 05/11/2026. Maven/Java não estavam disponíveis nesta sessão; por isso `mvn test`, a API e os endpoints ainda precisam de verificação. Veja [checagens realizadas](docs/checagem-local.md), o [exemplo de saída isolada do exportador](docs/exemplo-exportacao.feature) e o [roteiro de verificação](docs/roteiro-verificacao.md).
+**Estado da verificação:** `npm install` e `npm run build` foram executados em 05/11/2026. Maven/Java não estavam disponíveis nessa sessão; por isso `mvn test`, a inicialização da API, a persistência no PostgreSQL e as respostas HTTP ainda precisam de verificação real. Veja [checagens realizadas](docs/checagem-local.md) e o [roteiro com resultados esperados e observados](docs/roteiro-verificacao.md). O [exemplo de `.feature`](docs/exemplo-exportacao.feature) foi gerado em teste isolado do serviço, não por uma requisição à aplicação completa.
 
 ## 3. Organização e cinco camadas
 
@@ -65,7 +73,7 @@ estudio-bdd/
 │   └── src/
 │       ├── main/java/br/edu/mackenzie/estudiobdd/
 │       │   ├── config/       CORS, dados de demonstração, ProblemDetail
-│       │   ├── controller/   Endpoints, DTOs de entrada, métodos HTTP
+│       │   ├── controller/   Endpoints e métodos HTTP
 │       │   ├── dto/          DTOs de entrada e saída / mapeamento
 │       │   ├── service/      Casos de uso, transações, regras de negócio
 │       │   ├── repository/   Interfaces Spring Data JPA
@@ -151,16 +159,23 @@ cd backend
 mvn test
 ```
 
-`docs/roteiro-verificacao.md` inclui entradas, resultado esperado e campo **resultado observado** ainda pendente para preenchimento real. Não informe um teste como aprovado sem executá-lo. Uma vez validada a API, registre um commit/tag no seu repositório:
+Os testes incluem a rejeição de cenário sem `ENTAO`, de sugestão rejeitada sem motivo, o bloqueio de exportação com sugestão pendente e uma regra ArchUnit que impede acesso direto de controllers a repositories. O [roteiro de verificação](docs/roteiro-verificacao.md) contém entradas, resultados esperados e campos para resultados observados. Os testes Java ainda precisam ser executados com Maven; os exemplos de respostas HTTP também não foram observados em uma execução completa.
+
+O histórico já contém os commits das semanas 1, 2 e 3. Depois que `mvn test`, os endpoints e a SPA com dados reais estiverem verificados, marque o commit validado:
 
 ```bash
-git add . && git commit -m "feat: api completa e inicio da spa"
 git tag api-completa
 ```
 
 Para concluir a **Semana 4 (até 16/11)**: construir os editores de história, cenários e passos, interface de registro/decisão de sugestões ao lado da história, download `.feature` e tela do resumo; executar roteiro completo; concluir o registro de seis interações revisadas pelo grupo; preparar a entrega. A atividade de fluxo de aprovação configurável é opcional e está **fora deste escopo**.
 
-Para a entrega única em **17/11/2026**, além da aplicação: link do repositório, ZIP com versão `entrega-final`, README com integrantes, diagrama, documentação de endpoints, `.feature` realmente exportado, evidências e registro de IA. **Preencha os nomes dos integrantes antes de enviar:** `docs/integrantes.md`.
+### Pendências para a entrega única em 17/11/2026
+
+- Executar `mvn test`, verificar a API com PostgreSQL e registrar entradas, resultados esperados e observados no [roteiro](docs/roteiro-verificacao.md).
+- Completar a SPA da Semana 4 e demonstrar o fluxo de história, cenários, sugestões, exportação e resumo.
+- Exportar de fato um `.feature` pela API, guardar o arquivo no pacote de entrega e conferir seu Gherkin em português; o [exemplo isolado](docs/exemplo-exportacao.feature) ainda não satisfaz essa evidência.
+- Registrar e revisar com o grupo ao menos seis interações reais com IA (três da API e três da SPA) em [docs/registro-ia.md](docs/registro-ia.md); o conteúdo atual é um roteiro de propostas.
+- Reunir as evidências, criar a tag `entrega-final`, preparar o ZIP dessa versão e enviar o link do repositório e o ZIP no Moodle. Não incluir `node_modules`, pastas de compilação nem credenciais.
 
 ## 8. Limitações e decisões de projeto
 
